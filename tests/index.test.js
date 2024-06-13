@@ -1,20 +1,21 @@
+'strict mode';
+
 const assert = require('assert');
 const { describe, it, mock, afterEach, after } = require('node:test');
 const request = require('supertest');
 const User = require('../src/entities/user.entity');
 const app = require('../src/index');
 
-
-describe('Node Runner Tests Examples',() => {
+describe('Node Runner Tests Examples', () => {
 
   afterEach(() => {
     mock.reset();
   });
-  
+
   after((done) => app.close(done));
 
-  it('Should test sum',() => {
-    const sum = 4+4;
+  it('Should test sum', () => {
+    const sum = 4 + 4;
 
     assert.strictEqual(sum, 8)
   });
@@ -30,7 +31,7 @@ describe('Node Runner Tests Examples',() => {
     assert.strictEqual(user.getEmail(), 'teste@gmail.com');
   });
 
-  it('should test e2e',async  () => {
+  it('should test e2e', async () => {
     const response = await request(app)
       .get('/');
 
@@ -38,10 +39,19 @@ describe('Node Runner Tests Examples',() => {
     assert.strictEqual(response.text, 'Hello World!')
   });
 
-  it('should test e2e post',async  () => {
-    const response = await request(app)
-      .post('/save');
+  it('should test e2e post', async () => {
+    const user = User;
+    user.setAge(20);
+    user.setEmail('teste@gmail.com');
+    user.setName('Ezequiel');
 
-    assert.strictEqual(response.text, 'Mood Save!')
+    mock.method(global, 'fetch', () => {
+      return { status: 201, json: () => user }
+    })
+    const response = await request(app)
+      .post('/save')
+      .send(user);
+
+    assert.strictEqual(response.text, '{"email":"teste@gmail.com","name":"Ezequiel","age":20}')
   });
 })
