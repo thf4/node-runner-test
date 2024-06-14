@@ -7,10 +7,21 @@ const port = 3000;
 
 const serviceWorker = ServiceWorker;
 const handler = async (req, res) => {
-  if (req.url === '/save' && req.method === 'POST') {
-    const user = await serviceWorker.createUser(req.body);
-    res.writeHead(200, null, { "Content-type": "application/json" })
-    return res.end(JSON.stringify(user));
+  try {
+    if (req.url === '/save' && req.method === 'POST') {
+      const user = await serviceWorker.createUser(req.body);
+      res.writeHead(200, null, { "Content-type": "application/json" })
+      return res.end(JSON.stringify(user));
+    }
+
+    if (req.url === '/save/axios' && req.method === 'POST') {
+      const user = await serviceWorker.createUserWithAxios(req.body);
+      res.writeHead(200, null, { "Content-type": "application/json" })
+      return res.end(JSON.stringify(user));
+    }
+  } catch (error) {
+    res.write(error.message)
+    return res.end();
   }
   return res.end('Hello World!')
 };

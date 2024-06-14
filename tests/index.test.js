@@ -5,6 +5,8 @@ const { describe, it, mock, afterEach, after } = require('node:test');
 const request = require('supertest');
 const User = require('../src/entities/user.entity');
 const app = require('../src/index');
+const axios = require('axios');
+const service = require('../src/services');
 
 describe('Node Runner Tests Examples', () => {
 
@@ -53,5 +55,49 @@ describe('Node Runner Tests Examples', () => {
       .send(user);
 
     assert.strictEqual(response.text, '{"email":"teste@gmail.com","name":"Ezequiel","age":20}')
+  });
+
+  it('should test e2e post with axios mock', async () => {
+    const user = User;
+    user.setAge(12);
+    user.setEmail('node@gmail.com');
+    user.setName('Ezreal');
+
+    mock.method(axios, 'post', () => {
+      return {
+        status: 201, json: () => ({
+          email: "teste@gmail.com", name: "Ezequiel", age: 20
+        })
+      }
+    })
+    const response = await request(app)
+      .post('/save/axios')
+      .send(user);
+
+    assert.strictEqual(response.text, '{"email":"teste@gmail.com","name":"Ezequiel","age":20}');
+  });
+
+  it('should test post with axios mock error', async () => {
+    const user = User;
+    user.setAge(12);
+    user.setEmail('node@gmail.com');
+    user.setName('Ezreal');
+
+    const error = new Error('some error message');
+    mock.method(axios, 'post', () => Promise.reject(error))
+
+    await assert.rejects(async () => service.createUserWithAxios(user), error);
+  });
+
+  it('should test post with fetch mock error', async () => {
+    const user = User;
+    user.setAge(12);
+    user.setEmail('node@gmail.com');
+    user.setName('Ezreal');
+
+    const error = new Error('some error message');
+    mock.method(global, 'fetch', () => Promise.reject(error))
+
+    await assert.rejects(async () => service.createUser(user), error);
   });
 })

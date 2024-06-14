@@ -1,5 +1,5 @@
 'strict mode';
-
+const axios = require('axios');
 class ServiceWorker {
   url;
   constructor() {
@@ -13,7 +13,15 @@ class ServiceWorker {
     } catch (error) {
       throw error
     }
+  }
 
+  async createUserWithAxios(user) {
+    try {
+      const users = await axios.post(this.url, { user });
+      return users.json();
+    } catch (error) {
+      throw error
+    }
   }
 }
 
