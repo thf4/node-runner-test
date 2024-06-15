@@ -100,4 +100,35 @@ describe('Node Runner Tests Examples', () => {
 
     await assert.rejects(async () => service.createUser(user), error);
   });
+
+  it('should test post with service mock error', async () => {
+    const user = User;
+    user.setAge(12);
+    user.setEmail('node@gmail.com');
+    user.setName('Ezreal');
+
+    const error = new Error('some error message');
+    mock.method(service, 'createUser', () => Promise.reject(error))
+
+    await assert.rejects(async () => service.createUser(user), error);
+  });
+
+  it('should test service mock', async () => {
+    const user = User;
+    user.setAge(12);
+    user.setEmail('node@gmail.com');
+    user.setName('Ezreal');
+
+    const returnuser = {
+      age: 10,
+      name: 'Estela',
+      email: 'mundo@gmail.com'
+    };
+    mock.method(service, 'createUser', () => returnuser);
+
+    const result = await service.createUser(user);
+     assert.equal(result, returnuser);
+     // spy call function mock
+     assert.equal(service.createUser.mock.calls.length, 1);
+  });
 })
